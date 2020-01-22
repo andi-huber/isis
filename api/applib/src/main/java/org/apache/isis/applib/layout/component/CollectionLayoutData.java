@@ -19,7 +19,6 @@
 package org.apache.isis.applib.layout.component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -30,6 +29,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.apache.isis.applib.annotation.Where;
 import org.apache.isis.applib.layout.links.Link;
+import org.apache.isis.core.commons.collections.Can;
 
 /**
  * Describes the layout of a single collection, broadly corresponds to the {@link org.apache.isis.applib.annotation.CollectionLayout} annotation.
@@ -196,23 +196,24 @@ HasCssClass, HasDescribedAs, HasHidden, HasNamed {
         this.sortedBy = sortedBy;
     }
 
-
-
-    private List<ActionLayoutData> actions = new ArrayList<>();
+    private final Object $actionsLock = new Object[0]; // serializable
+    private Can<ActionLayoutData> actions = Can.empty(); // serializable
 
     // no wrapper
     @Override
     @XmlElement(name = "action", required = false)
     public List<ActionLayoutData> getActions() {
-        return actions;
+        synchronized ($actionsLock) {
+            return actions.toList();    
+        }
     }
 
     @Override
     public void setActions(List<ActionLayoutData> actionLayoutDatas) {
-        this.actions = actionLayoutDatas;
+        synchronized ($actionsLock) {
+            this.actions = Can.ofCollection(actionLayoutDatas);
+        }
     }
-
-
 
     private CollectionLayoutDataOwner owner;
     /**
