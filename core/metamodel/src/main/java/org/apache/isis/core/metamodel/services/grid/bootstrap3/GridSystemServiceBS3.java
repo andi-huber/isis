@@ -521,7 +521,7 @@ public class GridSystemServiceBS3 extends GridSystemServiceAbstract<BS3Grid> {
                     // action to the property
                     val collectionLayoutData = collectionLayoutDataById.get(id);
                     if(collectionLayoutData==null) {
-                        log.warn("failed to lookup CollectionLayoutData by id '{}'", id);
+                        log.warn("Failed to lookup CollectionLayoutData by id '{}'", id);
                     } else {
                         val actionLayoutData = new ActionLayoutData(actionId);
                         addActionTo(collectionLayoutData, actionLayoutData);
@@ -582,7 +582,7 @@ public class GridSystemServiceBS3 extends GridSystemServiceAbstract<BS3Grid> {
         for (final String propertyId : propertyIds) {
             if(!existingIds.contains(propertyId)) {
                 final PropertyLayoutData propertyLayoutData = new PropertyLayoutData(propertyId);
-                fieldSet.getProperties().add(propertyLayoutData);
+                fieldSet.addProperty(propertyLayoutData);
                 propertyLayoutData.setOwner(fieldSet);
                 propertyLayoutDataById.put(propertyId, propertyLayoutData);
             }
@@ -652,11 +652,7 @@ public class GridSystemServiceBS3 extends GridSystemServiceAbstract<BS3Grid> {
     private void addActionTo(
             final ActionLayoutDataOwner owner,
             final ActionLayoutData actionLayoutData) {
-        List<ActionLayoutData> actions = owner.getActions();
-        if(actions == null) {
-            owner.setActions(actions = _Lists.newArrayList());
-        }
-        actions.add(actionLayoutData);
+        owner.addAction(actionLayoutData);
         actionLayoutData.setOwner(owner);
     }
 

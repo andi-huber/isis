@@ -39,8 +39,10 @@ import org.apache.isis.applib.services.message.MessageService;
 import org.apache.isis.core.commons.internal.collections._Lists;
 import org.apache.isis.core.commons.internal.collections._Maps;
 import org.apache.isis.core.commons.internal.environment.IsisSystemEnvironment;
+import org.apache.isis.core.commons.internal.exceptions._Exceptions;
 import org.apache.isis.core.commons.internal.resources._Resources;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -51,7 +53,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GridLoaderServiceDefault implements GridLoaderService {
 
-
+    @Inject private MessageService messageService;
+    @Inject private GridReaderUsingJaxb gridReader;
+    @Inject private IsisSystemEnvironment isisSystemEnvironment;
+    
     static class DomainClassAndLayout {
         private final Class<?> domainClass;
         private final String layoutIfAny;
@@ -183,6 +188,8 @@ public class GridLoaderServiceDefault implements GridLoaderService {
             }
             return grid;
         } catch(Exception ex) {
+            
+            val exceptionMessage = _Exceptions.getMessage(ex);
 
             if(supportsReloading()) {
                 // save fact that this was bad XML, so that we don't log again if called next time
@@ -192,7 +199,7 @@ public class GridLoaderServiceDefault implements GridLoaderService {
             // note that we don't blacklist if the file exists but couldn't be parsed;
             // the developer might fix so we will want to retry.
             final String resourceName = resourceNameFor(dcal);
-            final String message = "Failed to parse " + resourceName + " file (" + ex.getMessage() + ")";
+            final String message = "Failed to parse " + resourceName + " file (" + exceptionMessage + ")";
             if(supportsReloading()) {
                 messageService.warnUser(message);
             }
@@ -248,10 +255,5 @@ public class GridLoaderServiceDefault implements GridLoaderService {
         return null;
     }
 
-    // -- DEPENDENCIES
-
-    @Inject MessageService messageService;
-    @Inject GridReaderUsingJaxb gridReader;
-    @Inject IsisSystemEnvironment isisSystemEnvironment;
 
 }
